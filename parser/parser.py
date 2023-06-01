@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from typing import List
 
 from openpyxl import load_workbook
@@ -45,6 +46,46 @@ def is_merged_cell(cur_sheet, col, row) -> bool:
     return is_merged
 
 
+def get_search(arr: List, subject: str):
+    out = None
+    for item in arr:
+        out = re.search(item, subject)
+        if out:
+            break
+    return out
+
+
+def get_audience(subject: str) -> str | None:
+    subj_list = [r"ЛК-\d\d\d", r"ПА-\d\d", r"А-\d\d\d", r"У-\d\d\d"]
+    subj_list_typos = [r"У - \d\d\d", r"У- \d\d\d", r"ЛК- \d\d\d", r"ЛК -\d\d\d", r"ПА- \d\d", r"А- \d\d\d",
+                       r"ЛК \d\d\d", r"П-\d"]
+    audience = get_search(subj_list, subject)
+
+    if audience is None and "Иностранный" not in subject and "Физическая культура" not in subject \
+            and re.search(r"БЦ-\d\d\d", subject) is None and re.search(r"ЦУВП-\d\d\d", subject) is None \
+            and re.search(r"Библиотека", subject) is None \
+            and subject != "Безопасность жизнедеятельности (Л 2-13н) Ларионов М.В." and subject != " ":
+
+        subj_to_fix = get_search(subj_list_typos, subject)
+
+        if subj_to_fix is not None:
+            # print(subject, subj_to_fix)
+            if re.search(r"ЛК \d\d\d", subject):
+                aud = f"ЛК-{subject[subj_to_fix.end() - 3:subj_to_fix.end()]}"
+            elif re.search(r"П-\d", subject):
+                aud = f"ПА-{subject[subj_to_fix.end() - 1:subj_to_fix.end()]}"
+            else:
+                aud = subject[subj_to_fix.start():subj_to_fix.end()].replace(' ', '')
+            subject = subject[0:subj_to_fix.start()] + aud + subject[subj_to_fix.end(): len(subject)]
+
+            audience = get_search(subj_list, subject)
+
+    if audience is not None:
+        return subject[audience.start():audience.end()]
+
+    return None
+
+
 def parsing(wb, i, week_parity_flag=False):
     sheet = wb.worksheets[i]
     start_with_b = 0
@@ -86,7 +127,6 @@ def parsing(wb, i, week_parity_flag=False):
                                 week_parity = "НЕЧЁТ."
 
                         JSON_OUT[sheet.title][day_of_week][period][week_parity] = {}
-                        subjects = []
 
                         for k in range(MAX_COLS - 4 - start_with_b):
                             # same_val_above = False
@@ -99,10 +139,10 @@ def parsing(wb, i, week_parity_flag=False):
                                 continue
 
                             subject = subject.replace("\n", " ")
-                            subjects.append(subject)
 
-                        JSON_OUT[sheet.title][day_of_week][period][week_parity] = subjects
-                        # print(excel_path, sheet.title, day_of_week, period, week_parity, subjects)
+                            audience = get_audience(subject)
+
+                            JSON_OUT[sheet.title][day_of_week][period][week_parity][subject] = audience
 
 
 for excel_path in get_files(PATH):
