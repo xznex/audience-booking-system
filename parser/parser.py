@@ -124,9 +124,18 @@ def parser(wb, i, week_parity_flag=False):
 
                         if week_parity_flag:
                             if j == 0:
-                                week_parity = "ЧЁТ."
+                                week_parity = "чёт"
                             else:
-                                week_parity = "НЕЧЁТ."
+                                week_parity = "нечёт"
+
+                        if week_parity == "чет":
+                            week_parity = "чёт"
+                        elif week_parity == "ЧЁТ.":
+                            week_parity = "чёт"
+                        elif week_parity == "НЕЧЁТ.":
+                            week_parity = "нечёт"
+                        elif week_parity == "нечет.":
+                            week_parity = "нечёт"
 
                         JSON_OUT[sheet.title][day_of_week][period][week_parity] = {}
 
