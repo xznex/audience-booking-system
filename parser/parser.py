@@ -69,7 +69,6 @@ def get_audience(subject: str) -> str | None:
         subj_to_fix = get_search(subj_list_typos, subject)
 
         if subj_to_fix is not None:
-            # print(subject, subj_to_fix)
             if re.search(r"ЛК \d\d\d", subject):
                 aud = f"ЛК-{subject[subj_to_fix.end() - 3:subj_to_fix.end()]}"
             elif re.search(r"П-\d", subject):
@@ -86,9 +85,12 @@ def get_audience(subject: str) -> str | None:
     return None
 
 
-def parsing(wb, i, week_parity_flag=False):
+def parser(wb, i, week_parity_flag=False):
     sheet = wb.worksheets[i]
     start_with_b = 0
+
+    if sheet.title == "3 курс":
+        return
 
     if sheet.title == "ИГУиП 1 курс":
         start_with_b = 1
@@ -129,7 +131,6 @@ def parsing(wb, i, week_parity_flag=False):
                         JSON_OUT[sheet.title][day_of_week][period][week_parity] = {}
 
                         for k in range(MAX_COLS - 4 - start_with_b):
-                            # same_val_above = False
                             if j == 1 and (k + start_with_b + 5 in merged_rows):
                                 subject = sheet[bottom + i][k + start_with_b + 4].value
                             else:
@@ -157,12 +158,12 @@ for excel_path in get_files(PATH):
         ws = wb.active
 
         if ws['D6'].value == "НЕД.":
-            parsing(wb, 0)
+            parser(wb, 0)
         else:
-            parsing(wb, 0, True)
+            parser(wb, 0, True)
     else:
         for i in range(quantity_sheets):
-            parsing(wb, i)
+            parser(wb, i)
 
 with open("data_file.json", "w") as write_file:
     json.dump(JSON_OUT, write_file, ensure_ascii=False)
