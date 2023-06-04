@@ -1,17 +1,32 @@
 from database import Base
 
 from sqlalchemy import Column, Integer, String, Text, Boolean, Time, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy_utils.types import ChoiceType
 
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(25), unique=True)
-    email = Column(String(80), unique=True)
-    password = Column(Text)
-    is_staff = Column(Boolean, default=False)
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True
+    )
+    username: Mapped[str] = mapped_column(
+        String(length=1024), nullable=False
+    )
+    email: Mapped[str] = mapped_column(
+        String(length=320), unique=True, index=True, nullable=False
+    )
+    hashed_password: Mapped[str] = mapped_column(
+        String(length=1024), nullable=False
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_superuser: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
     audiences = relationship("Audience", back_populates="user")
 
     def __repr__(self):
@@ -35,9 +50,15 @@ class Audience(Base):
         ("нечёт", "Нечётная")
     )
 
-    id = Column(Integer, primary_key=True)
-    audience = Column(String(10))
-    event = Column(Text)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True
+    )
+    audience: Mapped[str] = mapped_column(
+        String(length=10), nullable=True
+    )
+    event: Mapped[str] = mapped_column(
+        String, nullable=False
+    )
     day_of_week = Column(ChoiceType(choices=DAY_OF_WEEK))
     parity = Column(ChoiceType(choices=PARITY))
     start_of_class = Column(Time)
