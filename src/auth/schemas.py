@@ -21,9 +21,6 @@ class UserCreate(schemas.BaseUserCreate):
     is_superuser: bool = False
     is_verified: bool = False
 
-    class Config:
-        orm_mode = True
-
 
 class UserUpdate(schemas.BaseUserUpdate):
     pass

@@ -1,16 +1,8 @@
 from fastapi import FastAPI
-from fastapi_users import FastAPIUsers
 
-from audience_routes import audience_router
-from auth.auth import auth_backend
-from auth.database import User
-from auth.manager import get_user_manager
-from auth.schemas import UserRead, UserCreate, UserUpdate
-
-fastapi_users = FastAPIUsers[User, int](
-    get_user_manager,
-    [auth_backend],
-)
+from src.auth.base_config import auth_backend, fastapi_users
+from src.auth.schemas import UserRead, UserCreate, UserUpdate
+from src.booking.router import audience_router
 
 app = FastAPI()
 

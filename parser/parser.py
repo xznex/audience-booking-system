@@ -5,7 +5,7 @@ from typing import List
 
 from openpyxl import load_workbook
 
-PATH = os.path.dirname(__file__) + r"\src"
+PATH = os.path.dirname(__file__) + r"\schedules"
 
 GRADUATE_SCHOOL = 1
 

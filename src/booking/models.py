@@ -1,6 +1,6 @@
-from database import Base
+from src.database import Base
 
-from sqlalchemy import Column, Integer, String, Text, Boolean, Time, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Time, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy_utils.types import ChoiceType
 
@@ -36,6 +36,29 @@ class User(Base):
 class Audience(Base):
     __tablename__ = "audience"
 
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True
+    )
+    audience: Mapped[str] = mapped_column(
+        String(length=10), nullable=False
+    )
+    # оборудование
+    equipment: Mapped[str] = mapped_column(
+        String, nullable=True
+    )
+    addition: Mapped[str] = mapped_column(
+        String, nullable=True
+    )
+
+    # user = relationship('User', back_populates='audiences')
+
+    def __repr__(self):
+        return f"<Audience {self.id}>"
+
+
+class BookedAudience(Audience):
+    __tablename__ = "booked_audience"
+
     DAY_OF_WEEK = (
         ("ПОНЕДЕЛЬНИК", "Понедельник"),
         ("ВТОРНИК", "Вторник"),
@@ -54,7 +77,7 @@ class Audience(Base):
         Integer, primary_key=True
     )
     audience: Mapped[str] = mapped_column(
-        String(length=10), nullable=True
+        String(length=10), nullable=False
     )
     event: Mapped[str] = mapped_column(
         String, nullable=False
@@ -64,7 +87,6 @@ class Audience(Base):
     start_of_class = Column(Time)
     end_of_class = Column(Time)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
-    user = relationship('User', back_populates='audiences')
 
     def __repr__(self):
-        return f"<Audience {self.id}>"
+        return f"<BookedAudience {self.id}>"
